@@ -1,5 +1,5 @@
-using API.Data;
 using Microsoft.EntityFrameworkCore;
+using Persistence;
 
 var builder = WebApplication.CreateBuilder(args);
 var connectionString = builder.Configuration.GetConnectionString("DefautlConnection");
@@ -19,21 +19,17 @@ using var scope = app.Services.CreateScope();
 var context = scope.ServiceProvider.GetRequiredService<DataContext>();
 var logger = scope.ServiceProvider.GetRequiredService<ILogger<Program>>();
 
-try
-{
-  context.Database.Migrate();
-  DbInitializer.Initialize(context);
-}
-catch (Exception e)
-{
-  logger.LogError(e, "Problem migrating data");
+try {
+    await context.Database.MigrateAsync();
+    await Seed.SeedData(context);
+} catch (Exception e) {
+    logger.LogError(e, "Problem migrating data");
 }
 
 // Configure the HTTP request pipeline.
-if (app.Environment.IsDevelopment())
-{
-  app.UseSwagger();
-  app.UseSwaggerUI();
+if (app.Environment.IsDevelopment()) {
+    app.UseSwagger();
+    app.UseSwaggerUI();
 }
 
 app.UseHttpsRedirection();

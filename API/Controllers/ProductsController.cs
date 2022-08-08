@@ -1,28 +1,17 @@
-using API.Data;
-using API.Models;
+using Application.Products;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 
 namespace API.Controllers;
 
-[ApiController]
-[Route("controller")]
-public class ProductsController : ControllerBase
-{
-  private readonly DataContext _context;
+public class ProductsController : BaseController {
 
-  public ProductsController(DataContext context)
-  {
-    _context = context;
-  }
+    [HttpGet]
+    public async Task<IActionResult> GetProducts() {
+        return HandleResult(await Mediator.Send(new List.Command { }));
+    }
 
-  [HttpGet]
-  public async Task<ActionResult<List<Product>>> GetProducts() {
-    return await _context.Products.ToListAsync();
-  }
-
-  [HttpGet("{id}")]
-  public async Task<ActionResult<Product>> GetProduct(int id) {
-    return await _context.Products.FindAsync(id);
-  }
+    [HttpGet("{id}")]
+    public async Task<IActionResult> GetProduct(Guid id) {
+        return HandleResult(await Mediator.Send(new Detail.Command { Id = id }));
+    }
 }
